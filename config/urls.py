@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('usuarios.urls')),
-    path('', include('camara.urls')),
+    path('usuarios/', include('usuarios.urls')),
+    path('camara/', include('camara.urls')),
+    path('', lambda request: redirect('login')),  # Redirige la raíz a login
 ]

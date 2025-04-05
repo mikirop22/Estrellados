@@ -1,35 +1,23 @@
-<!-- camara/templates/camara/camara.html -->
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cámara</title>
-</head>
-<body>
-    <h1>Abriendo tu cámara</h1>
-    
-    <!-- Video donde se mostrará la cámara -->
-    <video id="videoElement" width="640" height="480" autoplay></video>
+{% extends "base.html" %}
 
-    <script>
-        // Verificar si el navegador soporta la API getUserMedia
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // Intentar acceder a la cámara
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    // Obtener el elemento de video
-                    var video = document.getElementById('videoElement');
-                    // Asignar el stream de la cámara al video
-                    video.srcObject = stream;
-                })
-                .catch(function(error) {
-                    console.log("Error al acceder a la cámara: ", error);
-                    alert("No se pudo acceder a la cámara. Por favor, asegúrate de permitir el acceso.");
-                });
-        } else {
-            alert("Tu navegador no soporta la API getUserMedia.");
-        }
-    </script>
-</body>
-</html>
+{% block title %}Cámara{% endblock %}
+
+{% block content %}
+<div class="content-box">
+    <h1>Cámara activada</h1>
+    <video id="videoElement" width="640" height="480" autoplay></video>
+</div>
+
+<script>
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                document.getElementById('videoElement').srcObject = stream;
+            })
+            .catch(function(error) {
+                alert("No se pudo acceder a la cámara.");
+                console.log(error);
+            });
+    }
+</script>
+{% endblock %}

@@ -1,29 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/colors.css' %}">
 </head>
 <body>
-    <h2>Iniciar sesión</h2>
+    <div class="container">
+        <div class="content-box">
+            <h2 style="color: var(--content-box-text-color);">Iniciar sesión</h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <p style="color: red">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p style="color: var(--content-box-text-color);">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
 
-    <form method="post">
-        {% csrf_token %}
-        <label>Usuario:</label><br>
-        <input type="text" name="username" required><br><br>
+            <form method="post">
+                {% csrf_token %}
+                <label style="color: var(--content-box-text-color);">Usuario:</label><br>
+                <input type="text" name="username" required><br><br>
 
-        <label>Contraseña:</label><br>
-        <input type="password" name="password" required><br><br>
+                <label style="color: var(--content-box-text-color);">Contraseña:</label><br>
+                <input type="password" name="password" required><br><br>
 
-        <button type="submit">Entrar</button>
-    </form>
+                <button type="submit">Entrar</button>
+            </form>
 
-    <br>
-    <p>¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></p>
-</body>
+            <br>
+            <p style="color: var(--content-box-text-color);">¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></p>
+        </div>
+    </div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92ba382fe8c3bcbc',t:'MTc0Mzg2ODQxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
