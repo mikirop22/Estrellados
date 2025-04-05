@@ -1,0 +1,100 @@
+/* static/css/colors.css */
+
+/* Define all colors as CSS custom properties (variables) */
+:root {
+    --background-color: red; 
+    --text-color: black; 
+    --link-color: red; 
+    --link-hover-color: red; /* Link hover color */
+    --tab-background-color: black; /* Tab bar background color (previously black) */
+    --tab-border-color: gold; /* Tab border color (previously gold) */
+    --tab-text-color: white; /* Tab text color */
+    --tab-active-background-color: rgb(31, 2, 2); /* Active tab background color */
+    --tab-active-text-color: white; /* Active tab text color */
+    --tab-hover-background-color: gold; /* Tab hover background color */
+    --content-box-background-color: white; /* Content box background color */
+    --content-box-text-color: black; /* Content box text color */
+    --content-box-border-color: gold; /* Content box border color (previously gold) */
+    --button-background-color: black; /* Button background color (previously black) */
+    --button-text-color: white; /* Button text color */
+    --button-border-color: gold; /* Button border color (previously gold) */
+    --button-hover-background-color: black; /* Button hover background color */
+}
+
+/* Apply the variables to the styles */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-grow: 1;
+}
+
+.nav-tabs {
+    background-color: var(--tab-background-color);
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--tab-border-color);
+}
+
+.nav-tabs a {
+    color: var(--tab-text-color);
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    border: 1px solid var(--tab-border-color);
+    border-radius: 5px 5px 0 0;
+    display: inline-block;
+}
+
+.nav-tabs a.active {
+    background-color: var(--tab-active-background-color);
+    color: var(--tab-active-text-color);
+}
+
+.nav-tabs a:hover {
+    background-color: var(--tab-hover-background-color);
+}
+
+.content-box {
+    background-color: var(--content-box-background-color);
+    color: var(--content-box-text-color);
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid var(--content-box-border-color);
+    border-radius: 5px;
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+button, input[type="submit"] {
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+    border: 1px solid var(--button-border-color);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: var(--button-hover-background-color);
+}
