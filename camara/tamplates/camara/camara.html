@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cámara</title>
+</head>
+<body>
+    <h2>Acceder a la cámara</h2>
+
+    <video id="camara" width="640" height="480" autoplay></video>
+    <br><br>
+    <button id="detener" onclick="detenerCamara()">Detener cámara</button>
+
+    <script>
+        // Función para acceder a la cámara del usuario
+        async function iniciarCamara() {
+            try {
+                // Solicitar acceso a la cámara
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // Asignar el stream de video al elemento de <video>
+                const videoElement = document.getElementById('camara');
+                videoElement.srcObject = stream;
+
+                // Guardar el stream para poder detenerlo más tarde
+                videoElement.onloadedmetadata = () => {
+                    videoElement.play();
+                };
+            } catch (error) {
+                alert("No se pudo acceder a la cámara: " + error);
+            }
+        }
+
+        // Función para detener la cámara
+        function detenerCamara() {
+            const videoElement = document.getElementById('camara');
+            const stream = videoElement.srcObject;
+            const tracks = stream.getTracks();
+
+            // Detener todas las pistas del stream
+            tracks.forEach(track => track.stop());
+            videoElement.srcObject = null;
+        }
+
+        // Iniciar la cámara cuando la página se carga
+        window.onload = iniciarCamara;
+    </script>
+</body>
+</html>
