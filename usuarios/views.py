@@ -41,5 +41,5 @@ def registro_view(request):
 
 @login_required
 def home(request):
-    return HttpResponse("Bienvenido, estás logueado.")
+    return render(request, 'usuarios/home.html')
 
