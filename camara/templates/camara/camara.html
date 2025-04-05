@@ -6,9 +6,14 @@
 <div class="content-box">
     <h1>Cámara activada</h1>
     <video id="videoElement" width="640" height="480" autoplay></video>
+    <button id="toggleDetectionBtn">Iniciar detección</button>
 </div>
 
 <script>
+    let detectionActive = false;
+    let detectionInterval;
+
+    // Acceso a la cámara
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function(stream) {
@@ -19,5 +24,43 @@
                 console.log(error);
             });
     }
+
+    function capturarYEnviarFrame() {
+        const videoElement = document.getElementById('videoElement');
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        fetch('/camara/procesar_imagen/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data); // Aquí podrías mostrar las detecciones en pantalla
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+
+    document.getElementById('toggleDetectionBtn').addEventListener('click', function() {
+        const btn = this;
+        if (!detectionActive) {
+            detectionActive = true;
+            btn.textContent = 'Parar detección';
+            detectionInterval = setInterval(capturarYEnviarFrame, 1000); // cada 1s
+        } else {
+            detectionActive = false;
+            btn.textContent = 'Iniciar detección';
+            clearInterval(detectionInterval);
+        }
+    });
 </script>
 {% endblock %}
