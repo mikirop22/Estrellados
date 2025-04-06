@@ -3,21 +3,279 @@
 {% block title %}Cámara{% endblock %}
 
 {% block content %}
-<div class="content-box">
-    <h1>Cámara activada</h1>
-    <video id="videoElement" width="640" height="480" autoplay></video>
+<style>
+    .camara-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .video-box {
+        min-width: 300px;
+        flex: 1;
+    }
+
+    .processed-images {
+        min-width: 300px;
+        flex: 1;
+    }
+
+    #videoElement {
+        width: 100%;
+        max-width: 640px;
+        height: auto;
+    }
+
+    #outputImages img {
+        width: 100%;
+        max-width: 640px;
+        height: auto;
+        margin-bottom: 10px;
+        border: 2px solid var(--content-box-border-color);
+        border-radius: 5px;
+    }
+
+    /* Estilo para las pestañas usando las variables de colors.css */
+    .tabs {
+        display: flex;
+        background-color: var(--tab-background-color);
+        border-bottom: 1px solid var(--tab-border-color);
+        padding: 0.5rem 1rem;
+    }
+
+    .tab {
+        padding: 0.5rem 1rem;
+        margin-right: 0.5rem;
+        background-color: var(--tab-background-color);
+        color: var(--tab-text-color);
+        border: 1px solid var(--tab-border-color);
+        border-bottom: none;
+        border-radius: 5px 5px 0 0;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .tab-active {
+        background-color: var(--tab-active-background-color);
+        color: var(--tab-active-text-color);
+        border: 1px solid var(--tab-border-color);
+        border-bottom: none;
+    }
+
+    .tab:hover {
+        background-color: var(--tab-hover-background-color);
+    }
+
+    /* Contenido de las pestañas */
+    .tab-content {
+        display: none;
+        padding: 1rem;
+        background-color: var(--content-box-background-color);
+        color: var(--content-box-text-color);
+        border: 1px solid var(--content-box-border-color);
+        border-radius: 0 5px 5px 5px;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .camera-section {
+        display: flex;
+        gap: 40px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    /* Estilo para la tabla de resultados */
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .results-table th, .results-table td {
+        padding: 10px;
+        border: 1px solid var(--content-box-border-color);
+        text-align: left;
+    }
+
+    .results-table th {
+        background-color: var(--tab-background-color);
+        color: var(--tab-text-color);
+    }
+</style>
+
+<div class="camara-container">
+    <!-- Pestañas para cambiar entre cámara y resultados -->
+    <div class="tabs">
+        <div class="tab tab-active" id="tabCamera">Cámara</div>
+        <div class="tab" id="tabResults">Resultados</div>
+    </div>
+
+    <!-- Sección de la cámara -->
+    <div id="cameraTab" class="tab-content active">
+        <div class="camera-section">
+            <div class="video-box">
+                <h2>Cámara 1</h2>
+                <video id="videoElement" width="640" height="480" autoplay></video>
+                <br>
+                <button id="toggleButton">Iniciar</button>
+            </div>
+            <div class="processed-images">
+                <h2>Detecciones</h2>
+                <div id="outputImages"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de resultados -->
+    <div id="resultsTab" class="tab-content">
+        <h2>Resumen de Detecciones</h2>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Objetivo</th>
+                    <th>Detectados</th>
+                    <th>Faltan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Rack Veri</td>
+                    <td id="rackVeriTarget">3</td>
+                    <td id="rackVeriCount">0</td>
+                    <td id="rackVeriRemaining">3</td>
+                </tr>
+                <tr>
+                    <td>Box Estrella</td>
+                    <td id="boxEstrellaTarget">1</td>
+                    <td id="boxEstrellaCount">0</td>
+                    <td id="boxEstrellaRemaining">1</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
+    const videoElement = document.getElementById('videoElement');
+    const toggleButton = document.getElementById('toggleButton');
+    const outputImages = document.getElementById('outputImages');
+    const tabCamera = document.getElementById('cameraTab');
+    const tabResults = document.getElementById('resultsTab');
+    const tabCameraButton = document.getElementById('tabCamera');
+    const tabResultsButton = document.getElementById('tabResults');
+    const rackVeriCountElement = document.getElementById('rackVeriCount');
+    const boxEstrellaCountElement = document.getElementById('boxEstrellaCount');
+    const rackVeriRemainingElement = document.getElementById('rackVeriRemaining');
+    const boxEstrellaRemainingElement = document.getElementById('boxEstrellaRemaining');
+    const rackVeriTarget = 3; // Objetivo para rack_veri
+    const boxEstrellaTarget = 1; // Objetivo para box_estrella
+    let streaming = false;
+    let intervalId = null;
+    let rackVeriCount = 0; // Contador para rack_veri
+    let boxEstrellaCount = 0; // Contador para box_estrella
+
+    // Acceso a la cámara
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function(stream) {
-                document.getElementById('videoElement').srcObject = stream;
+                videoElement.srcObject = stream;
             })
             .catch(function(error) {
                 alert("No se pudo acceder a la cámara.");
                 console.log(error);
             });
+    }
+
+    // Alternar entre iniciar y finalizar
+    toggleButton.addEventListener('click', function () {
+        streaming = !streaming;
+        toggleButton.textContent = streaming ? 'Finalizar' : 'Iniciar';
+
+        if (streaming) {
+            intervalId = setInterval(capturarYEnviar, 200); // Cada 200ms
+        } else {
+            clearInterval(intervalId);
+            // Cuando se presiona "Finalizar", cambia a la pestaña de resultados
+            mostrarResultados();
+        }
+    });
+
+    // Función para cambiar entre las pestañas
+    tabCameraButton.addEventListener('click', function() {
+        tabCamera.classList.add('active');
+        tabResults.classList.remove('active');
+        tabCameraButton.classList.add('tab-active');
+        tabResultsButton.classList.remove('tab-active');
+    });
+
+    tabResultsButton.addEventListener('click', function() {
+        tabResults.classList.add('active');
+        tabCamera.classList.remove('active');
+        tabResultsButton.classList.add('tab-active');
+        tabCameraButton.classList.remove('tab-active');
+    });
+
+    // Función para mostrar resultados automáticamente
+    function mostrarResultados() {
+        tabResults.classList.add('active');
+        tabCamera.classList.remove('active');
+        tabResultsButton.classList.add('tab-active');
+        tabCameraButton.classList.remove('tab-active');
+    }
+
+    function capturarYEnviar() {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        fetch('/camara/procesar_imagen/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.image) {
+                // Limpiar la sección de imágenes procesadas antes de agregar la nueva
+                outputImages.innerHTML = '';
+
+                // Crear la nueva imagen y agregarla al contenedor
+                const img = document.createElement('img');
+                img.src = data.image; // Asumimos que data.image incluye los bounding boxes
+                outputImages.appendChild(img); // Sustituir la imagen anterior
+            }
+
+            // Actualizar los contadores basados en las detecciones
+            if (data.detections) {
+                data.detections.forEach(detection => {
+                    if (detection.type === 'rack_veri' && rackVeriCount < rackVeriTarget) {
+                        rackVeriCount++;
+                    } else if (detection.type === 'box_estrella' && boxEstrellaCount < boxEstrellaTarget) {
+                        boxEstrellaCount++;
+                    }
+                });
+
+                // Actualizar los elementos en la tabla
+                rackVeriCountElement.textContent = rackVeriCount;
+                boxEstrellaCountElement.textContent = boxEstrellaCount;
+
+                // Calcular y actualizar los elementos faltantes
+                rackVeriRemainingElement.textContent = Math.max(0, rackVeriTarget - rackVeriCount);
+                boxEstrellaRemainingElement.textContent = Math.max(0, boxEstrellaTarget - boxEstrellaCount);
+            }
+        })
+        .catch(error => {
+            console.error("Error al procesar la imagen:", error);
+        });
     }
 </script>
 {% endblock %}
